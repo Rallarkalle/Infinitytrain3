@@ -1,0 +1,220 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+export type Role = 'admin' | 'employee';
+export type ProgressStatus = 'not_addressed' | 'basic' | 'good' | 'fully_understood';
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  avatar: string;
+}
+
+export interface Comment {
+  id: string;
+  userId: string;
+  text?: string;
+  imageUrl?: string;
+  drawingUrl?: string;
+  timestamp: Date;
+}
+
+export interface Subtopic {
+  id: string;
+  title: string;
+  resources: string;
+  comments: Comment[];
+}
+
+export interface Topic {
+  id: string;
+  title: string;
+  icon: string;
+  subtopics: Subtopic[];
+  isDeleted?: boolean;
+}
+
+export interface UserProgress {
+  userId: string;
+  subtopicId: string;
+  status: ProgressStatus;
+}
+
+interface TrainingContextType {
+  currentUser: User | null;
+  users: User[];
+  topics: Topic[];
+  progress: UserProgress[];
+  setCurrentUser: (user: User) => void;
+  updateProgress: (subtopicId: string, status: ProgressStatus) => void;
+  addComment: (subtopicId: string, comment: Omit<Comment, 'id' | 'timestamp'>) => void;
+  addTopic: (topic: Omit<Topic, 'id'>) => void;
+  updateTopic: (topic: Topic) => void;
+  archiveTopic: (topicId: string) => void;
+  restoreTopic: (topicId: string) => void;
+}
+
+const TrainingContext = createContext<TrainingContextType | undefined>(undefined);
+
+const MOCK_USERS: User[] = [
+  { id: 'u1', name: 'Admin User', email: 'admin@oceaninfinity.com', role: 'admin', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix' },
+  { id: 'u2', name: 'Sarah Connor', email: 'sarah@oceaninfinity.com', role: 'employee', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah' },
+  { id: 'u3', name: 'John Smith', email: 'john@oceaninfinity.com', role: 'employee', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John' },
+];
+
+export function TrainingProvider({ children }: { children: React.ReactNode }) {
+  const [currentUser, setCurrentUser] = useState<User>(MOCK_USERS[0]);
+  const [users] = useState<User[]>(MOCK_USERS);
+  const [topics, setTopics] = useState<Topic[]>([]);
+  const [progress, setProgress] = useState<UserProgress[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load topics and progress from backend
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [topicsRes, progressRes] = await Promise.all([
+          fetch('/api/topics'),
+          fetch(`/api/progress/${currentUser.id}`)
+        ]);
+
+        if (topicsRes.ok) {
+          const topicsData = await topicsRes.json();
+          setTopics(topicsData);
+        }
+
+        if (progressRes.ok) {
+          const progressData = await progressRes.json();
+          setProgress(progressData);
+        }
+      } catch (error) {
+        console.error('Failed to load data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, [currentUser.id]);
+
+  const updateProgress = (subtopicId: string, status: ProgressStatus) => {
+    const newProgress: UserProgress = {
+      userId: currentUser.id,
+      subtopicId,
+      status
+    };
+
+    setProgress(prev => {
+      const existing = prev.findIndex(p => p.userId === currentUser.id && p.subtopicId === subtopicId);
+      if (existing >= 0) {
+        const updated = [...prev];
+        updated[existing] = newProgress;
+        return updated;
+      }
+      return [...prev, newProgress];
+    });
+
+    // Save to backend
+    fetch('/api/progress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newProgress)
+    }).catch(err => console.error('Failed to save progress:', err));
+  };
+
+  const addComment = (subtopicId: string, commentData: Omit<Comment, 'id' | 'timestamp'>) => {
+    const newComment: Comment = {
+      ...commentData,
+      id: Math.random().toString(36).substr(2, 9),
+      timestamp: new Date(),
+    };
+
+    setTopics(prevTopics => {
+      return prevTopics.map(topic => {
+        const subtopicIndex = topic.subtopics.findIndex(st => st.id === subtopicId);
+        if (subtopicIndex >= 0) {
+          const newSubtopics = [...topic.subtopics];
+          newSubtopics[subtopicIndex] = {
+            ...newSubtopics[subtopicIndex],
+            comments: [...newSubtopics[subtopicIndex].comments, newComment]
+          };
+          return { ...topic, subtopics: newSubtopics };
+        }
+        return topic;
+      });
+    });
+
+    // Save comment to backend
+    fetch('/api/comments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subtopicId, comment: newComment })
+    }).catch(err => console.error('Failed to save comment:', err));
+  };
+
+  const addTopic = (topicData: Omit<Topic, 'id'>) => {
+    const newTopic: Topic = { 
+      ...topicData, 
+      id: Math.random().toString(36).substr(2, 9) 
+    };
+
+    setTopics(prev => [...prev, newTopic]);
+
+    // Save to backend
+    fetch('/api/topics', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newTopic)
+    }).catch(err => console.error('Failed to save topic:', err));
+  };
+
+  const updateTopic = (updatedTopic: Topic) => {
+    setTopics(prev => prev.map(t => t.id === updatedTopic.id ? updatedTopic : t));
+
+    // Save to backend
+    fetch(`/api/topics/${updatedTopic.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedTopic)
+    }).catch(err => console.error('Failed to update topic:', err));
+  };
+
+  const archiveTopic = (topicId: string) => {
+    setTopics(prev => prev.map(t => t.id === topicId ? { ...t, isDeleted: true } : t));
+
+    // Save to backend
+    fetch(`/api/topics/${topicId}`, {
+      method: 'DELETE'
+    }).catch(err => console.error('Failed to archive topic:', err));
+  };
+
+  const restoreTopic = (topicId: string) => {
+    setTopics(prev => prev.map(t => t.id === topicId ? { ...t, isDeleted: false } : t));
+
+    // Save to backend
+    fetch(`/api/topics/${topicId}/restore`, {
+      method: 'POST'
+    }).catch(err => console.error('Failed to restore topic:', err));
+  };
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
+
+  return (
+    <TrainingContext.Provider value={{ 
+      currentUser, users, topics, progress, 
+      setCurrentUser, updateProgress, addComment, addTopic, updateTopic,
+      archiveTopic, restoreTopic
+    }}>
+      {children}
+    </TrainingContext.Provider>
+  );
+}
+
+export function useTraining() {
+  const context = useContext(TrainingContext);
+  if (!context) throw new Error('useTraining must be used within a TrainingProvider');
+  return context;
+}
