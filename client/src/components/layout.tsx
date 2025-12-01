@@ -44,7 +44,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-background font-sans text-foreground flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-40 w-full border-b bg-card/80 backdrop-blur-md supports-[backdrop-filter]:bg-card/60">
-        <div className="container flex h-16 items-center justify-between px-4 md:px-6">
+        <div className="w-full flex h-16 items-center justify-between px-4 md:px-6">
           {/* Profile Picture Top-Left */}
           <div className="flex items-center gap-3">
             <img src={displayUser.avatar} alt={displayUser.name} className="h-10 w-10 rounded-full ring-2 ring-secondary/20" />
@@ -57,7 +57,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
 
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+          {/* Center Navigation - Hidden on mobile */}
+          <nav className="hidden md:flex items-center gap-6 text-sm font-medium absolute left-1/2 transform -translate-x-1/2">
             <Link href="/" className={cn("transition-colors hover:text-secondary", location === '/' ? "text-secondary" : "text-muted-foreground")}>
               Training Modules
             </Link>
@@ -68,7 +69,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
             )}
           </nav>
 
-          <div className="flex items-center gap-4">
+          {/* Right Side Buttons */}
+          <div className="flex items-center gap-2">
             {currentUser.role === 'admin' && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -130,7 +132,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 container py-8 px-4 md:px-6">
+      <main className="flex-1 w-full max-w-7xl mx-auto py-8 px-4 md:px-6">
         {children}
       </main>
     </div>

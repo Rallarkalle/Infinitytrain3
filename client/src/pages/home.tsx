@@ -94,8 +94,8 @@ export default function Home() {
 
   return (
     <Layout>
-      <div className="flex flex-col items-center gap-8">
-        <div className="text-center space-y-4 max-w-2xl mx-auto mt-8 relative">
+      <div className="flex flex-col items-center justify-center gap-8 w-full">
+        <div className="text-center space-y-4 max-w-2xl mx-auto mt-8 relative w-full">
           <h1 className="text-4xl md:text-5xl font-heading font-bold text-black tracking-tight">
             Training Modules
           </h1>
@@ -104,7 +104,7 @@ export default function Home() {
           </p>
 
           {currentUser?.role === 'admin' && (
-             <div className="absolute right-0 top-0 md:-right-24 flex flex-col gap-4">
+             <div className="absolute right-0 top-0 flex flex-col gap-4">
                 {/* Add Module Button */}
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger asChild>
