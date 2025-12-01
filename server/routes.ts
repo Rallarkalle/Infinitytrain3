@@ -14,6 +14,12 @@ if ('initialize' in storage) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Disable caching for API routes
+  app.use('/api/*', (_req, res, next) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    next();
+  });
+
   // Topics API
   app.get("/api/topics", async (_req, res) => {
     try {
