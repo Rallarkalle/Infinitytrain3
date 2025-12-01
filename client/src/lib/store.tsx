@@ -57,21 +57,52 @@ interface TrainingContextType {
 
 const TrainingContext = createContext<TrainingContextType | undefined>(undefined);
 
-const MOCK_USERS: User[] = [
-  { id: 'u1', name: 'Admin User', email: 'admin@oceaninfinity.com', role: 'admin', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix' },
-  { id: 'u2', name: 'Sarah Connor', email: 'sarah@oceaninfinity.com', role: 'employee', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah' },
-  { id: 'u3', name: 'John Smith', email: 'john@oceaninfinity.com', role: 'employee', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John' },
-];
-
 export function TrainingProvider({ children }: { children: React.ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<User>(MOCK_USERS[0]);
-  const [users] = useState<User[]>(MOCK_USERS);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [progress, setProgress] = useState<UserProgress[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Load users from backend
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const topicsRes = await fetch('/api/topics');
+        const topicsData = await topicsRes.json();
+        
+        // Extract unique user IDs from comments and progress
+        const userIds = new Set<string>();
+        topicsData.forEach((topic: Topic) => {
+          topic.subtopics.forEach(subtopic => {
+            subtopic.comments.forEach(comment => {
+              userIds.add(comment.userId);
+            });
+          });
+        });
+        
+        // Fetch all users
+        const userPromises = Array.from(userIds).map(id => 
+          fetch(`/api/users/${id}`).then(r => r.json())
+        );
+        const usersData = await Promise.all(userPromises);
+        setUsers(usersData);
+        
+        // Set first user as default if not set
+        if (!currentUser && usersData.length > 0) {
+          setCurrentUser(usersData[0]);
+        }
+      } catch (error) {
+        console.error('Failed to load users:', error);
+      }
+    };
+    loadUsers();
+  }, []);
+
   // Load topics and progress from backend
   useEffect(() => {
+    if (!currentUser) return;
+    
     const loadData = async () => {
       try {
         const [topicsRes, progressRes] = await Promise.all([
