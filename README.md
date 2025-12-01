@@ -15,8 +15,10 @@ A comprehensive employee training and learning management system with progress t
 
 - **Frontend**: React 19, TypeScript, Vite, TailwindCSS, Radix UI
 - **Backend**: Express.js, Node.js
-- **Database**: SQLite (better-sqlite3) - lightweight and perfect for cloud deployments
-- **Deployment**: Optimized for Render.com
+- **Database**: 
+  - **Production**: Supabase (PostgreSQL) - Free 500MB tier
+  - **Development**: SQLite (better-sqlite3) - Zero config
+- **Deployment**: Render.com - Free tier available
 
 ## Local Development
 
@@ -53,59 +55,44 @@ A comprehensive employee training and learning management system with progress t
 - `npm start` - Start production server
 - `npm run check` - Run TypeScript type checking
 
-## Deploying to Render
+## Deploying to Render + Supabase
 
-### Quick Deploy
+### Quick Deploy (100% Free)
 
-This application is configured for easy deployment to Render using the included `render.yaml` Blueprint.
+This application uses **Supabase** for the database (free 500MB PostgreSQL) and **Render** for hosting.
 
-1. **Push your code to GitHub** (if not already done)
+**👉 See [DEPLOYMENT-SUPABASE.md](./DEPLOYMENT-SUPABASE.md) for complete step-by-step instructions.**
 
-2. **Create a new Web Service on Render**:
-   - Go to [Render Dashboard](https://dashboard.render.com/)
-   - Click "New +" and select "Web Service"
-   - Connect your GitHub repository
-   - Render will automatically detect the `render.yaml` file
+### Quick Summary
 
-3. **Configure the service** (if not using Blueprint):
-   - **Name**: infinitytrain (or your preferred name)
-   - **Environment**: Node
-   - **Build Command**: `npm install && npm run build`
-   - **Start Command**: `npm start`
-   - **Plan**: Free (or your preferred plan)
+1. **Supabase Setup** (5 minutes):
+   - Create free Supabase account
+   - Create new project
+   - Run `supabase-schema.sql` in SQL Editor
+   - Copy your `SUPABASE_URL` and `SUPABASE_ANON_KEY`
 
-4. **Add Persistent Disk** (Critical for database persistence):
-   - In the service settings, go to "Disks"
-   - Add a new disk:
-     - **Name**: infinitytrain-data
-     - **Mount Path**: `/opt/render/project/data`
-     - **Size**: 1GB (or as needed)
+2. **Render Setup** (5 minutes):
+   - Push code to GitHub
+   - Create new Web Service on Render
+   - Add environment variables:
+     - `SUPABASE_URL`
+     - `SUPABASE_ANON_KEY`
+   - Deploy!
 
-5. **Deploy**: Click "Create Web Service" or "Deploy"
+### Why Supabase?
 
-### Environment Variables
-
-The application automatically detects when running on Render via the `RENDER` environment variable. No additional configuration is needed.
+- ✅ **100% Free** - 500MB database, no expiration
+- ✅ **PostgreSQL** - Full-featured relational database
+- ✅ **Automatic Backups** - 7 days included
+- ✅ **Real-time Ready** - Built-in subscriptions
+- ✅ **No Paid Disk Required** - Unlike Render's persistent disks ($$$)
 
 ### Database Storage
 
-- **Local Development**: Database stored as `training.db` in the project root
-- **Render Production**: Database stored in persistent disk at `/opt/render/project/data/training.db`
+- **Local Development**: SQLite (`training.db` in project root)
+- **Production (Render)**: Supabase PostgreSQL (cloud-hosted)
 
-The SQLite database ensures:
-- ✅ Lightweight and efficient
-- ✅ No external database service required
-- ✅ Persistent storage across deployments (when using Render Disks)
-- ✅ Zero configuration needed
-- ✅ Perfect for small to medium-sized teams
-
-### Render Blueprint Configuration
-
-The included `render.yaml` file configures:
-- Node.js 20.19.0 runtime
-- Automatic build and start commands
-- Persistent disk for database storage
-- Free tier optimization
+The app automatically detects which database to use based on environment variables.
 
 ## Default Users
 
@@ -157,21 +144,22 @@ The application comes with pre-configured demo users:
 
 ### Scaling
 
-- The SQLite database is suitable for small to medium deployments (up to thousands of users)
-- For larger deployments, consider migrating to PostgreSQL
-- Render's persistent disk ensures data survives across deployments
+- Supabase free tier supports up to 50,000 monthly active users
+- For larger deployments, Supabase paid tiers offer more storage and bandwidth
+- Render can be upgraded to paid plans for always-on service
 
 ### Backups
 
-- Render Disks are backed up automatically
-- For additional safety, implement periodic database exports
-- The SQLite file can be easily downloaded and backed up externally
+- Supabase automatically backs up your database (7 days on free tier)
+- Supabase paid plans offer daily backups with 30-day retention
+- You can export SQL dumps anytime from Supabase dashboard
 
 ### Performance
 
 - Static assets are served efficiently via Express
 - Vite optimizes the frontend bundle
-- SQLite provides fast read/write operations
+- Supabase PostgreSQL provides excellent query performance
+- Render free tier spins down after 15 min inactivity (first request ~30s)
 
 ## Support & Issues
 

@@ -6,10 +6,11 @@ package-lock.json
 dist/
 build/
 
-# Database
+# Database files (local SQLite only - Supabase is cloud-hosted)
 *.db
 *.db-shm
 *.db-wal
+training.db*
 
 # Environment variables
 .env

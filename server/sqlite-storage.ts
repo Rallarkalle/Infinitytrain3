@@ -58,17 +58,15 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: User): Promise<User>;
+  initialize?(): Promise<void>;
 }
 
 export class SQLiteStorage implements IStorage {
   private db: Database.Database;
 
   constructor(dbPath?: string) {
-    // For Render, use /opt/render/project/data for persistent storage
     // For local development, use current directory
-    const defaultPath = process.env.RENDER 
-      ? '/opt/render/project/data/training.db'
-      : path.join(process.cwd(), 'training.db');
+    const defaultPath = path.join(process.cwd(), 'training.db');
     
     const finalPath = dbPath || defaultPath;
     
@@ -402,6 +400,11 @@ export class SQLiteStorage implements IStorage {
 
   close() {
     this.db.close();
+  }
+
+  async initialize(): Promise<void> {
+    // SQLite initialization happens in constructor
+    return Promise.resolve();
   }
 }
 

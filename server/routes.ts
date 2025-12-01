@@ -1,6 +1,17 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./sqlite-storage";
+import { SQLiteStorage } from "./sqlite-storage";
+import { SupabaseStorage } from "./supabase-storage";
+
+// Use Supabase if environment variables are set, otherwise SQLite
+const storage = process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY
+  ? new SupabaseStorage(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY)
+  : new SQLiteStorage();
+
+// Initialize storage (only matters for Supabase to check/create initial data)
+if ('initialize' in storage) {
+  storage.initialize().catch(err => console.error('Failed to initialize storage:', err));
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Topics API
