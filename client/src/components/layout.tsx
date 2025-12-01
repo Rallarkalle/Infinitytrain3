@@ -1,36 +1,44 @@
 import React from 'react';
 import { Link, useLocation } from 'wouter';
-import { useTraining } from '@/lib/store';
+import { useTraining, type User } from '@/lib/store';
 import { 
   LayoutDashboard, 
   Users, 
   LogOut, 
   Menu,
-  Infinity
+  Infinity,
+  Check
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { currentUser, setCurrentUser, users } = useTraining();
+  const { currentUser, viewAsUser, setCurrentUser, setViewAsUser, users } = useTraining();
   const [location, setLocation] = useLocation();
 
   const handleLogout = () => {
     setCurrentUser(null);
+    setViewAsUser(null);
     setLocation('/login');
   };
 
-  const handleSwitchUser = () => {
-    if (!currentUser) return;
-    // Only admins can switch users
-    if (currentUser.role !== 'admin') return;
-    const currentIndex = users.findIndex(u => u.id === currentUser.id);
-    const nextIndex = (currentIndex + 1) % users.length;
-    setCurrentUser(users[nextIndex]);
+  const handleViewAsUser = (user: User) => {
+    if (currentUser?.role !== 'admin') return;
+    setViewAsUser(user.id === currentUser.id ? null : user);
   };
 
   if (!currentUser) return null;
+  
+  const displayUser = viewAsUser || currentUser;
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground flex flex-col">
@@ -39,10 +47,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="container flex h-16 items-center justify-between px-4 md:px-6">
           {/* Profile Picture Top-Left */}
           <div className="flex items-center gap-3">
-            <img src={currentUser.avatar} alt={currentUser.name} className="h-10 w-10 rounded-full ring-2 ring-secondary/20" />
+            <img src={displayUser.avatar} alt={displayUser.name} className="h-10 w-10 rounded-full ring-2 ring-secondary/20" />
             <div className="flex flex-col">
-              <p className="font-medium leading-none text-sm">{currentUser.name}</p>
-              <p className="text-xs text-muted-foreground capitalize">{currentUser.role}</p>
+              <p className="font-medium leading-none text-sm">
+                {displayUser.name}
+                {viewAsUser && <span className="text-xs text-muted-foreground ml-2">(viewing)</span>}
+              </p>
+              <p className="text-xs text-muted-foreground capitalize">{displayUser.role}</p>
             </div>
           </div>
 
@@ -59,9 +70,32 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-4">
             {currentUser.role === 'admin' && (
-              <Button variant="ghost" size="icon" onClick={handleSwitchUser} title="Switch User (Admin Only)">
-                <Users className="h-4 w-4" />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" title="View as User">
+                    <Users className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>View as User</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {users.map(user => (
+                    <DropdownMenuItem
+                      key={user.id}
+                      onClick={() => handleViewAsUser(user)}
+                      className="flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-2">
+                        <img src={user.avatar} alt={user.name} className="h-6 w-6 rounded-full" />
+                        <span>{user.name}</span>
+                      </div>
+                      {(viewAsUser?.id === user.id || (!viewAsUser && user.id === currentUser.id)) && (
+                        <Check className="h-4 w-4" />
+                      )}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
 
             <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout">

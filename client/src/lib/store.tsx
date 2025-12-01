@@ -43,10 +43,12 @@ export interface UserProgress {
 
 interface TrainingContextType {
   currentUser: User | null;
+  viewAsUser: User | null;
   users: User[];
   topics: Topic[];
   progress: UserProgress[];
   setCurrentUser: (user: User) => void;
+  setViewAsUser: (user: User | null) => void;
   updateProgress: (subtopicId: string, status: ProgressStatus) => void;
   addComment: (subtopicId: string, comment: Omit<Comment, 'id' | 'timestamp'>) => void;
   addTopic: (topic: Omit<Topic, 'id'>) => void;
@@ -59,6 +61,7 @@ const TrainingContext = createContext<TrainingContextType | undefined>(undefined
 
 export function TrainingProvider({ children }: { children: React.ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [viewAsUser, setViewAsUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [progress, setProgress] = useState<UserProgress[]>([]);
@@ -109,13 +112,15 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     loadInitialData();
   }, [currentUser]);
 
-  // Load progress when user changes
+  // Load progress when viewing user changes (admin viewing others) or current user changes
   useEffect(() => {
     if (!currentUser) return;
     
+    const userToLoad = viewAsUser || currentUser;
+    
     const loadData = async () => {
       try {
-        const progressRes = await fetch(`/api/progress/${currentUser.id}`);
+        const progressRes = await fetch(`/api/progress/${userToLoad.id}`);
 
         if (progressRes.ok) {
           const progressData = await progressRes.json();
@@ -127,17 +132,18 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     };
 
     loadData();
-  }, [currentUser]);
+  }, [currentUser, viewAsUser]);
 
   const updateProgress = (subtopicId: string, status: ProgressStatus) => {
+    const userToUpdate = viewAsUser || currentUser;
     const newProgress: UserProgress = {
-      userId: currentUser.id,
+      userId: userToUpdate.id,
       subtopicId,
       status
     };
 
     setProgress(prev => {
-      const existing = prev.findIndex(p => p.userId === currentUser.id && p.subtopicId === subtopicId);
+      const existing = prev.findIndex(p => p.userId === userToUpdate.id && p.subtopicId === subtopicId);
       if (existing >= 0) {
         const updated = [...prev];
         updated[existing] = newProgress;
@@ -235,8 +241,8 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <TrainingContext.Provider value={{ 
-      currentUser, users, topics, progress, 
-      setCurrentUser, updateProgress, addComment, addTopic, updateTopic,
+      currentUser, viewAsUser, users, topics, progress, 
+      setCurrentUser, setViewAsUser, updateProgress, addComment, addTopic, updateTopic,
       archiveTopic, restoreTopic
     }}>
       {children}
