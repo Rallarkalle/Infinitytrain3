@@ -14,17 +14,23 @@ import { cn } from '@/lib/utils';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { currentUser, setCurrentUser, users } = useTraining();
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setLocation('/login');
+  };
 
   const handleSwitchUser = () => {
     if (!currentUser) return;
-    // Cycle through users for demo purposes
+    // Only admins can switch users
+    if (currentUser.role !== 'admin') return;
     const currentIndex = users.findIndex(u => u.id === currentUser.id);
     const nextIndex = (currentIndex + 1) % users.length;
     setCurrentUser(users[nextIndex]);
   };
 
-  if (!currentUser) return null; // Should not happen with mock data
+  if (!currentUser) return null;
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground flex flex-col">
@@ -52,8 +58,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </nav>
 
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={handleSwitchUser} title="Switch User (Demo)">
-              <Users className="h-4 w-4" />
+            {currentUser.role === 'admin' && (
+              <Button variant="ghost" size="icon" onClick={handleSwitchUser} title="Switch User (Admin Only)">
+                <Users className="h-4 w-4" />
+              </Button>
+            )}
+
+            <Button variant="ghost" size="icon" onClick={handleLogout} title="Logout">
+              <LogOut className="h-4 w-4" />
             </Button>
 
             {/* Mobile Menu */}

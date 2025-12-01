@@ -5,62 +5,41 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Infinity, Mail, Lock } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Infinity, Mail, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
-  const { setCurrentUser, users } = useTraining();
+  const { setCurrentUser } = useTraining();
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [signupEmail, setSignupEmail] = useState('');
-  const [signupPassword, setSignupPassword] = useState('');
-  const [signupName, setSignupName] = useState('');
-  const [signupPhone, setSignupPhone] = useState('');
-  const [selectedAvatar, setSelectedAvatar] = useState('');
-  const [showUploadAvatar, setShowUploadAvatar] = useState(false);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const funnyAvatars = [
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=John',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=Dustin',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=Miranda',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=Lucas',
-    'https://api.dicebear.com/7.x/avataaars/svg?seed=Oliver',
-  ];
-
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const user = users.find(u => u.email === email);
-    if (user) {
-      setCurrentUser(user);
-      setLocation('/');
-    } else {
-      alert('User not found. Try: admin@oceaninfinity.com, sarah@oceaninfinity.com, or john@oceaninfinity.com');
-    }
-  };
+    setError('');
+    setIsLoading(true);
 
-  const handleSignup = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedAvatar && !showUploadAvatar) {
-      alert('Please select or upload an avatar');
-      return;
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() })
+      });
+
+      if (response.ok) {
+        const user = await response.json();
+        setCurrentUser(user);
+        setLocation('/');
+      } else {
+        const data = await response.json();
+        setError(data.error || 'Login failed. Please check your email address.');
+      }
+    } catch (err) {
+      setError('Unable to connect to server. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
-    if (!signupName || !signupEmail || !signupPhone) {
-      alert('Please fill in all fields');
-      return;
-    }
-    // In a real app, this would call the backend to create the account
-    // For now, show a success message
-    alert('Signup request submitted! Admin approval required.\n\nNote: This requires backend implementation for actual account creation and admin approval workflow.');
-    setSignupName('');
-    setSignupEmail('');
-    setSignupPassword('');
-    setSignupPhone('');
-    setSelectedAvatar('');
-    setShowUploadAvatar(false);
   };
 
   return (
@@ -75,9 +54,44 @@ export default function LoginPage() {
         </CardHeader>
 
         <CardContent>
-          <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Login</TabsTrigger>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your.email@oceaninfinity.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-10"
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Logging in...' : 'Login'}
+            </Button>
+
+            <div className="text-sm text-muted-foreground text-center pt-4">
+              <p>Contact your administrator for access</p>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
 

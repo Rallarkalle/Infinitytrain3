@@ -102,6 +102,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Login API - authenticate by email
+  app.post("/api/login", async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        res.status(400).json({ error: "Email is required" });
+        return;
+      }
+      
+      const user = await storage.getUserByUsername(email);
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+      
+      res.json(user);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to login" });
+    }
+  });
+
   // Comments API
   app.post("/api/comments", async (req, res) => {
     try {

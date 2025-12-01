@@ -64,36 +64,40 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
   const [progress, setProgress] = useState<UserProgress[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load initial data
+  // Load initial data only after user logs in
   useEffect(() => {
+    if (!currentUser) {
+      setIsLoading(false);
+      return;
+    }
+
     const loadInitialData = async () => {
+      setIsLoading(true);
       try {
-        // Fetch topics first to get all data
+        // Fetch topics
         const topicsRes = await fetch('/api/topics');
         const topicsData = await topicsRes.json();
         setTopics(topicsData);
         
-        // Extract unique user IDs from all topics/comments
-        const userIds = new Set<string>(['u1', 'u2', 'u3', 'u4', 'u5', 'u6']); // Include all possible users
-        topicsData.forEach((topic: Topic) => {
-          topic.subtopics.forEach(subtopic => {
-            subtopic.comments.forEach(comment => {
-              userIds.add(comment.userId);
+        // If admin, load all users for the directory/admin view
+        if (currentUser.role === 'admin') {
+          const userIds = new Set<string>(['u1', 'u2', 'u3', 'u4', 'u5', 'u6']);
+          topicsData.forEach((topic: Topic) => {
+            topic.subtopics.forEach(subtopic => {
+              subtopic.comments.forEach(comment => {
+                userIds.add(comment.userId);
+              });
             });
           });
-        });
-        
-        // Fetch all users
-        const userPromises = Array.from(userIds).map(id => 
-          fetch(`/api/users/${id}`).then(r => r.ok ? r.json() : null).catch(() => null)
-        );
-        const usersData = (await Promise.all(userPromises)).filter(u => u !== null);
-        setUsers(usersData);
-        
-        // Set first user as default (Admin)
-        if (usersData.length > 0) {
-          const admin = usersData.find(u => u.role === 'admin') || usersData[0];
-          setCurrentUser(admin);
+          
+          const userPromises = Array.from(userIds).map(id => 
+            fetch(`/api/users/${id}`).then(r => r.ok ? r.json() : null).catch(() => null)
+          );
+          const usersData = (await Promise.all(userPromises)).filter(u => u !== null);
+          setUsers(usersData);
+        } else {
+          // Non-admin users only see themselves
+          setUsers([currentUser]);
         }
         
         setIsLoading(false);
@@ -103,7 +107,7 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       }
     };
     loadInitialData();
-  }, []);
+  }, [currentUser]);
 
   // Load progress when user changes
   useEffect(() => {

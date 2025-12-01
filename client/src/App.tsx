@@ -1,19 +1,39 @@
-import { Switch, Route } from "wouter";
-import { TrainingProvider } from "@/lib/store";
+import { Switch, Route, useLocation } from "wouter";
+import { TrainingProvider, useTraining } from "@/lib/store";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/login";
 import Home from "@/pages/home";
 import TopicView from "@/pages/topic";
 import AdminDashboard from "@/pages/admin";
+import { useEffect } from "react";
+
+function ProtectedRoute({ component: Component, ...rest }: any) {
+  const { currentUser } = useTraining();
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (!currentUser) {
+      setLocation('/login');
+    }
+  }, [currentUser, setLocation]);
+
+  return currentUser ? <Component {...rest} /> : null;
+}
 
 function Router() {
   return (
     <Switch>
       <Route path="/login" component={Login} />
-      <Route path="/" component={Home} />
-      <Route path="/topic/:id" component={TopicView} />
-      <Route path="/admin" component={AdminDashboard} />
+      <Route path="/">
+        {(params) => <ProtectedRoute component={Home} {...params} />}
+      </Route>
+      <Route path="/topic/:id">
+        {(params) => <ProtectedRoute component={TopicView} {...params} />}
+      </Route>
+      <Route path="/admin">
+        {(params) => <ProtectedRoute component={AdminDashboard} {...params} />}
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
