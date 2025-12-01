@@ -104,7 +104,7 @@ export default function Home() {
           </p>
 
           {currentUser?.role === 'admin' && (
-             <div className="absolute right-0 top-0 flex flex-col gap-4">
+             <div className="absolute -right-16 top-0 flex flex-col gap-4">
                 {/* Add Module Button */}
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger asChild>

@@ -132,8 +132,8 @@ export function InfinityGrid({ topics, onEdit }: InfinityGridProps) {
                 className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 text-xs font-bold text-center px-2 py-1 leading-tight rounded-md max-w-[8rem]"
                 style={{ 
                   fontSize: '0.75rem', 
-                  backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                  color: '#1f2937',
+                  backgroundColor: '#107C10', 
+                  color: '#FFFFFF',
                   boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                   whiteSpace: 'normal',
                   wordBreak: 'break-word'

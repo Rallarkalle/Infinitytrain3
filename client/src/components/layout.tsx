@@ -43,27 +43,27 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-white font-sans text-foreground flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-40 w-full border-b bg-white shadow-sm">
+      <header className="sticky top-0 z-40 w-full border-b shadow-sm" style={{ background: 'linear-gradient(to right, #004E8C, #0078D4)' }}>
         <div className="w-full flex h-16 items-center justify-between px-4 md:px-6">
           {/* Profile Picture Top-Left */}
           <div className="flex items-center gap-3">
             <img src={displayUser.avatar} alt={displayUser.name} className="h-10 w-10 rounded-full ring-2 ring-primary/20" />
             <div className="flex flex-col">
-              <p className="font-medium leading-none text-sm">
+              <p className="font-medium leading-none text-sm text-white">
                 {displayUser.name}
-                {viewAsUser && <span className="text-xs text-muted-foreground ml-2">(viewing)</span>}
+                {viewAsUser && <span className="text-xs text-white/80 ml-2">(viewing)</span>}
               </p>
-              <p className="text-xs text-muted-foreground capitalize">{displayUser.role}</p>
+              <p className="text-xs text-white/80 capitalize">{displayUser.role}</p>
             </div>
           </div>
 
           {/* Center Navigation - Hidden on mobile */}
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium absolute left-1/2 transform -translate-x-1/2">
-            <Link href="/" className={cn("transition-colors hover:text-primary", location === '/' ? "text-primary font-semibold" : "text-foreground")}>
+            <Link href="/" className={cn("transition-colors hover:text-white/80", location === '/' ? "text-white font-semibold" : "text-white/70")}>
               Training Modules
             </Link>
             {currentUser.role === 'admin' && (
-              <Link href="/admin" className={cn("transition-colors hover:text-primary", location === '/admin' ? "text-primary font-semibold" : "text-foreground")}>
+              <Link href="/admin" className={cn("transition-colors hover:text-white/80", location === '/admin' ? "text-white font-semibold" : "text-white/70")}>
                 Admin Panel
               </Link>
             )}
