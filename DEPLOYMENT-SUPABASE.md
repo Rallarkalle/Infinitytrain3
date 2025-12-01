@@ -122,7 +122,7 @@ Once deployed, the app automatically:
 ### Demo Users
 Log in with these accounts:
 - **Admin**: `admin@oceaninfinity.com`
-- **Employee**: `sarah@oceaninfinity.com` or `john@oceaninfinity.com`
+- **Employees**: `may@oceaninfinity.com`, `adam@oceaninfinity.com`, `chris@oceaninfinity.com`, `arta@oceaninfinity.com`, `enya@oceaninfinity.com`
 
 (No password required in demo mode - add auth later if needed)
 

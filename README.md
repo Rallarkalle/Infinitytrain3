@@ -99,8 +99,11 @@ The app automatically detects which database to use based on environment variabl
 The application comes with pre-configured demo users:
 
 - **Admin**: admin@oceaninfinity.com
-- **Employee 1**: sarah@oceaninfinity.com
-- **Employee 2**: john@oceaninfinity.com
+- **Employee**: may@oceaninfinity.com
+- **Employee**: adam@oceaninfinity.com
+- **Employee**: chris@oceaninfinity.com
+- **Employee**: arta@oceaninfinity.com
+- **Employee**: enya@oceaninfinity.com
 
 ## Project Structure
 

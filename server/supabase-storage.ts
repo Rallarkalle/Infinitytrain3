@@ -73,9 +73,12 @@ export class SupabaseStorage implements IStorage {
 
   private async initializeMockData() {
     const mockUsers = [
-      { id: 'u1', name: 'Admin User', email: 'admin@oceaninfinity.com', role: 'admin', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix' },
-      { id: 'u2', name: 'Sarah Connor', email: 'sarah@oceaninfinity.com', role: 'employee', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah' },
-      { id: 'u3', name: 'John Smith', email: 'john@oceaninfinity.com', role: 'employee', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John' },
+      { id: 'u1', name: 'Admin', email: 'admin@oceaninfinity.com', role: 'admin', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Admin' },
+      { id: 'u2', name: 'May', email: 'may@oceaninfinity.com', role: 'employee', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=May' },
+      { id: 'u3', name: 'Adam', email: 'adam@oceaninfinity.com', role: 'employee', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Adam' },
+      { id: 'u4', name: 'Chris', email: 'chris@oceaninfinity.com', role: 'employee', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Chris' },
+      { id: 'u5', name: 'Arta', email: 'arta@oceaninfinity.com', role: 'employee', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Arta' },
+      { id: 'u6', name: 'Enya', email: 'enya@oceaninfinity.com', role: 'employee', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Enya' },
     ];
 
     await this.supabase.from('users').insert(mockUsers);
