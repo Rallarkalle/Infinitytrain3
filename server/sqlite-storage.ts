@@ -105,6 +105,7 @@ export class SQLiteStorage implements IStorage {
         title TEXT NOT NULL,
         resources TEXT NOT NULL,
         resourceLinks TEXT,
+        sortOrder INTEGER DEFAULT 0,
         FOREIGN KEY (topicId) REFERENCES topics(id) ON DELETE CASCADE
       );
 
@@ -254,7 +255,7 @@ export class SQLiteStorage implements IStorage {
     const result: Topic[] = [];
     for (const topic of topics) {
       const subtopics = this.db.prepare(
-        'SELECT * FROM subtopics WHERE topicId = ?'
+        'SELECT * FROM subtopics WHERE topicId = ? ORDER BY sortOrder ASC'
       ).all(topic.id) as any[];
 
       const subtopicsWithComments: Subtopic[] = [];
@@ -300,14 +301,15 @@ export class SQLiteStorage implements IStorage {
 
     // Insert new subtopics
     const insertSubtopic = this.db.prepare(`
-      INSERT INTO subtopics (id, topicId, title, resources, resourceLinks) 
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO subtopics (id, topicId, title, resources, resourceLinks, sortOrder) 
+      VALUES (?, ?, ?, ?, ?, ?)
     `);
 
-    for (const subtopic of topic.subtopics) {
+    for (let i = 0; i < topic.subtopics.length; i++) {
+      const subtopic = topic.subtopics[i];
       const subtopicId = subtopic.id || randomUUID();
       const resourceLinksJson = subtopic.resourceLinks ? JSON.stringify(subtopic.resourceLinks) : null;
-      insertSubtopic.run(subtopicId, topicId, subtopic.title, subtopic.resources, resourceLinksJson);
+      insertSubtopic.run(subtopicId, topicId, subtopic.title, subtopic.resources, resourceLinksJson, i);
 
       // Insert comments for this subtopic
       const insertComment = this.db.prepare(`

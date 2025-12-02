@@ -166,7 +166,8 @@ export class SupabaseStorage implements IStorage {
       const { data: subtopics } = await this.supabase
         .from('subtopics')
         .select('*')
-        .eq('topic_id', topic.id);
+        .eq('topic_id', topic.id)
+        .order('sort_order', { ascending: true });
 
       const subtopicsWithComments: Subtopic[] = [];
       for (const subtopic of subtopics || []) {
@@ -222,7 +223,8 @@ export class SupabaseStorage implements IStorage {
       .eq('topic_id', topicId);
 
     // Insert new subtopics
-    for (const subtopic of topic.subtopics) {
+    for (let i = 0; i < topic.subtopics.length; i++) {
+      const subtopic = topic.subtopics[i];
       const subtopicId = subtopic.id || randomUUID();
       const resourceLinksJson = subtopic.resourceLinks ? JSON.stringify(subtopic.resourceLinks) : null;
       await this.supabase
@@ -232,7 +234,8 @@ export class SupabaseStorage implements IStorage {
           topic_id: topicId,
           title: subtopic.title,
           resources: subtopic.resources,
-          resource_links: resourceLinksJson
+          resource_links: resourceLinksJson,
+          sort_order: i
         });
 
       // Insert comments
