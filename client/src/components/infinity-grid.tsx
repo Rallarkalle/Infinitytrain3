@@ -68,7 +68,29 @@ export function InfinityGrid({ topics, onEdit }: InfinityGridProps) {
   
   const scaleFactor = getScaleFactor(activeTopics.length);
 
-  // Helper to get pie chart background
+  // Calculate progress percentage for a topic
+  const calculateTopicProgress = (topic: Topic): number => {
+    if (!topic.subtopics.length) return 0;
+
+    const subtopicIds = topic.subtopics.map(s => s.id);
+    const topicProgress = progress.filter(p => p.userId === displayUser?.id && subtopicIds.includes(p.subtopicId));
+    
+    let totalScore = 0;
+    topic.subtopics.forEach(st => {
+      const p = topicProgress.find(tp => tp.subtopicId === st.id);
+      const status = p?.status || 'not_addressed';
+      
+      // Weight: not_addressed=0, basic=33, good=66, fully_understood=100
+      if (status === 'fully_understood') totalScore += 100;
+      else if (status === 'good') totalScore += 66;
+      else if (status === 'basic') totalScore += 33;
+      // not_addressed adds 0
+    });
+
+    return Math.round(totalScore / topic.subtopics.length);
+  };
+
+  // Helper to get pie chart background (for non-image topics)
   const getPieChartBackground = (topic: Topic) => {
     if (!topic.subtopics.length) return 'white'; // No subtopics, just white
 
@@ -132,6 +154,14 @@ export function InfinityGrid({ topics, onEdit }: InfinityGridProps) {
         {activeTopics.map((topic, index) => {
           const IconComponent = (LucideIcons as any)[topic.icon] || LucideIcons.HelpCircle;
           const topicImage = getTopicImagePath(topic.title);
+          const progressPercent = calculateTopicProgress(topic);
+          
+          // SVG progress ring calculations
+          const size = 7 * scaleFactor * 16; // Convert rem to pixels (assuming 16px = 1rem)
+          const strokeWidth = 6; // Thicker border for better visibility
+          const radius = (size / 2) - (strokeWidth / 2);
+          const circumference = 2 * Math.PI * radius;
+          const strokeDashoffset = circumference - (progressPercent / 100) * circumference;
 
           return (
             <div 
@@ -139,19 +169,50 @@ export function InfinityGrid({ topics, onEdit }: InfinityGridProps) {
               className="relative group w-fit"
             >
               <Link href={`/topic/${topic.id}`}>
-                <div
-                  className={cn(
-                    "flex flex-col items-center justify-center cursor-pointer group relative overflow-hidden",
-                    topicImage ? "rounded-3xl" : "rounded-full",
-                    "shadow-lg hover:shadow-xl border-4 border-white transition-all duration-300",
-                    "hover:scale-110 hover:border-primary"
-                  )}
-                  style={{
-                     background: topicImage ? 'transparent' : getPieChartBackground(topic),
-                     width: `${7 * scaleFactor}rem`,
-                     height: `${7 * scaleFactor}rem`
-                  }}
-                >
+                <div className="relative" style={{ width: `${7 * scaleFactor}rem`, height: `${7 * scaleFactor}rem` }}>
+                  {/* Progress Ring SVG */}
+                  <svg
+                    className="absolute inset-0 -rotate-90"
+                    width={size}
+                    height={size}
+                  >
+                    {/* Background ring (white) */}
+                    <circle
+                      cx={size / 2}
+                      cy={size / 2}
+                      r={radius}
+                      fill="none"
+                      stroke="#FFFFFF"
+                      strokeWidth={strokeWidth}
+                    />
+                    {/* Progress ring (lime green) */}
+                    <circle
+                      cx={size / 2}
+                      cy={size / 2}
+                      r={radius}
+                      fill="none"
+                      stroke="#7acc00"
+                      strokeWidth={strokeWidth}
+                      strokeDasharray={circumference}
+                      strokeDashoffset={strokeDashoffset}
+                      strokeLinecap="round"
+                      className="transition-all duration-500"
+                    />
+                  </svg>
+                  
+                  {/* Topic Content */}
+                  <div
+                    className={cn(
+                      "absolute inset-0 flex flex-col items-center justify-center cursor-pointer group relative overflow-hidden",
+                      topicImage ? "rounded-3xl" : "rounded-full",
+                      "shadow-lg hover:shadow-xl transition-all duration-300",
+                      "hover:scale-105"
+                    )}
+                    style={{
+                      background: topicImage ? 'transparent' : getPieChartBackground(topic),
+                      margin: `${strokeWidth}px`
+                    }}
+                  >
                   {topicImage ? (
                     <div 
                       className="relative w-full h-full"
@@ -175,6 +236,7 @@ export function InfinityGrid({ topics, onEdit }: InfinityGridProps) {
                       />
                     </div>
                   )}
+                  </div>
                 </div>
               </Link>
               
