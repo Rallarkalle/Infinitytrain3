@@ -43,16 +43,6 @@ export function ResourceViewer({ resources, textResources, onClose, subtopicTitl
             <p className="text-muted-foreground text-center py-8">No resources available yet</p>
           ) : (
             <>
-              {/* Text Resources (legacy) */}
-              {textResources && (
-                <div className="prose max-w-none">
-                  <Card className="p-4">
-                    <h3 className="text-lg font-semibold mb-2">Written Resources</h3>
-                    <div className="whitespace-pre-wrap text-sm">{textResources}</div>
-                  </Card>
-                </div>
-              )}
-
               {/* Structured Resources */}
               {resources.length > 0 && (
                 <div className="space-y-4">
