@@ -18,6 +18,9 @@ interface Position {
 
 // Helper function to get image path for a topic
 const getTopicImagePath = (title: string): string | null => {
+  const normalizedTitle = title.toLowerCase().trim();
+  
+  // Direct mappings
   const imageMap: Record<string, string> = {
     'mbes': '/images/topics/mbes.jpg',
     'vc': '/images/topics/svc.png',
@@ -28,14 +31,22 @@ const getTopicImagePath = (title: string): string | null => {
     'svp': '/images/topics/svp.png',
     'cpt': '/images/topics/cpt.png',
     'subc dvr': '/images/topics/subc dvr.png',
-    'online log': '/images/topics/onlinelog_autolog.png',
-    'auto log': '/images/topics/onlinelog_autolog.png',
-    'helmsman': '/images/topics/helmsman_touchpad.png',
-    'touchpad': '/images/topics/helmsman_touchpad.png',
   };
   
-  const normalizedTitle = title.toLowerCase().trim();
-  return imageMap[normalizedTitle] || null;
+  // Check direct mapping first
+  if (imageMap[normalizedTitle]) {
+    return imageMap[normalizedTitle];
+  }
+  
+  // Check for partial matches
+  if (normalizedTitle.includes('online') || normalizedTitle.includes('auto log')) {
+    return '/images/topics/onlinelog_autolog.png';
+  }
+  if (normalizedTitle.includes('helmsman') || normalizedTitle.includes('touchpad')) {
+    return '/images/topics/helmsman_touchpad.png';
+  }
+  
+  return null;
 };
 
 export function InfinityGrid({ topics, onEdit }: InfinityGridProps) {
