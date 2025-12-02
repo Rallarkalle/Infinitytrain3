@@ -151,7 +151,10 @@ export function InfinityGrid({ topics, onEdit }: InfinityGridProps) {
                   }}
                 >
                   {topicImage ? (
-                    <div className="relative w-full h-full">
+                    <div 
+                      className="relative w-full h-full"
+                      style={topic.title.toLowerCase().includes('subc dvr') ? { backgroundColor: '#FFFFFF' } : undefined}
+                    >
                       <img 
                         src={topicImage} 
                         alt={topic.title}
