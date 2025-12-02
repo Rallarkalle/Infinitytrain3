@@ -1,23 +1,24 @@
 import React, { useState } from 'react';
 import { useRoute, useLocation } from 'wouter';
 import { Layout } from '@/components/layout';
-import { useTraining, ProgressStatus } from '@/lib/store';
+import { useTraining, ProgressStatus, type Subtopic } from '@/lib/store';
 import { Notepad } from '@/components/notepad';
 import { ResourceManager } from '@/components/resource-manager';
 import { ResourceViewer } from '@/components/resource-viewer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, BookOpen, MessageSquare, CheckCircle2, Settings } from 'lucide-react';
+import { ArrowLeft, BookOpen, MessageSquare, CheckCircle2, Settings, GripVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function TopicView() {
   const [, params] = useRoute('/topic/:id');
   const [, setLocation] = useLocation();
-  const { topics, progress, updateProgress, addComment, currentUser, viewAsUser, updateSubtopicResources } = useTraining();
+  const { topics, progress, updateProgress, addComment, currentUser, viewAsUser, updateSubtopicResources, updateTopic } = useTraining();
   const [activeResource, setActiveResource] = useState<string | null>(null);
   const [activeComments, setActiveComments] = useState<string | null>(null);
   const [manageResourcesFor, setManageResourcesFor] = useState<string | null>(null);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   const topic = topics.find(t => t.id === params?.id);
 
@@ -25,6 +26,35 @@ export default function TopicView() {
   if (!currentUser) return <div>Please login</div>;
 
   const displayUser = viewAsUser || currentUser;
+  const isAdmin = currentUser.role === 'admin' && !viewAsUser;
+
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === dropIndex) return;
+
+    const newSubtopics = [...topic.subtopics];
+    const [draggedItem] = newSubtopics.splice(draggedIndex, 1);
+    newSubtopics.splice(dropIndex, 0, draggedItem);
+
+    updateTopic({
+      ...topic,
+      subtopics: newSubtopics
+    });
+
+    setDraggedIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
 
   const getStatus = (subtopicId: string) => {
     const p = progress.find(p => p.userId === displayUser.id && p.subtopicId === subtopicId);
@@ -54,17 +84,39 @@ export default function TopicView() {
             {/* Icon placeholder - ideally dynamic */}
             <div className="text-2xl">📚</div> 
           </div>
-          <div>
+          <div className="flex-1">
             <h1 className="text-3xl font-bold text-primary">{topic.title}</h1>
             <p className="text-black font-medium">{topic.subtopics.length} Subtopics</p>
           </div>
+          {isAdmin && (
+            <div className="text-sm text-muted-foreground flex items-center gap-2">
+              <GripVertical className="w-4 h-4" />
+              Drag to reorder
+            </div>
+          )}
         </div>
 
         <div className="grid gap-6">
-          {topic.subtopics.map((subtopic) => (
-            <Card key={subtopic.id} className="border-l-4 border-l-transparent hover:border-l-secondary transition-all duration-300 hover:shadow-md">
+          {topic.subtopics.map((subtopic, index) => (
+            <Card 
+              key={subtopic.id} 
+              className={cn(
+                "border-l-4 border-l-transparent hover:border-l-secondary transition-all duration-300 hover:shadow-md",
+                draggedIndex === index && "opacity-50"
+              )}
+              draggable={isAdmin}
+              onDragStart={() => handleDragStart(index)}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDrop={(e) => handleDrop(e, index)}
+              onDragEnd={handleDragEnd}
+            >
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row gap-6 justify-between items-start md:items-center">
+                  {isAdmin && (
+                    <div className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-secondary transition-colors">
+                      <GripVertical className="w-5 h-5" />
+                    </div>
+                  )}
                   <div className="space-y-2 flex-1">
                     <h3 className="text-xl font-semibold">{subtopic.title}</h3>
                     <div className="flex gap-2 flex-wrap">
