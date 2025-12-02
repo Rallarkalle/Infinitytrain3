@@ -50,10 +50,12 @@ const getTopicImagePath = (title: string): string | null => {
 };
 
 export function InfinityGrid({ topics, onEdit }: InfinityGridProps) {
-  const { progress, currentUser } = useTraining();
+  const { progress, currentUser, viewAsUser } = useTraining();
   
   // Filter out archived topics
   const activeTopics = topics.filter(t => !t.isDeleted);
+
+  const displayUser = viewAsUser || currentUser;
 
   // Calculate dynamic icon size based on total items
   // Base size is w-28/h-28 (7rem = 112px) for clean grid display
@@ -71,7 +73,7 @@ export function InfinityGrid({ topics, onEdit }: InfinityGridProps) {
     if (!topic.subtopics.length) return 'white'; // No subtopics, just white
 
     const subtopicIds = topic.subtopics.map(s => s.id);
-    const topicProgress = progress.filter(p => p.userId === currentUser?.id && subtopicIds.includes(p.subtopicId));
+    const topicProgress = progress.filter(p => p.userId === displayUser?.id && subtopicIds.includes(p.subtopicId));
     
     const counts = {
       fully_understood: 0,

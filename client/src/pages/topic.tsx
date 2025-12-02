@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 export default function TopicView() {
   const [, params] = useRoute('/topic/:id');
   const [, setLocation] = useLocation();
-  const { topics, progress, updateProgress, addComment, currentUser } = useTraining();
+  const { topics, progress, updateProgress, addComment, currentUser, viewAsUser } = useTraining();
   const [activeResource, setActiveResource] = useState<string | null>(null);
   const [activeComments, setActiveComments] = useState<string | null>(null);
 
@@ -21,8 +21,10 @@ export default function TopicView() {
   if (!topic) return <div>Topic not found</div>;
   if (!currentUser) return <div>Please login</div>;
 
+  const displayUser = viewAsUser || currentUser;
+
   const getStatus = (subtopicId: string) => {
-    const p = progress.find(p => p.userId === currentUser.id && p.subtopicId === subtopicId);
+    const p = progress.find(p => p.userId === displayUser.id && p.subtopicId === subtopicId);
     return p?.status || 'not_addressed';
   };
 
