@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap');
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -54,9 +56,15 @@
   --color-sidebar-border: hsl(var(--sidebar-border));
   --color-sidebar-ring: hsl(var(--sidebar-ring));
 
-  --font-sans: "Inter", sans-serif;
-  --font-heading: "Outfit", sans-serif;
-  --font-hand: "Kalam", cursive;
+  --font-sans: "Montserrat", sans-serif;
+  --font-heading: "Montserrat", sans-serif;
+  --font-hand: "Montserrat", sans-serif;
+}
+
+/* Apply Montserrat Light globally */
+* {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 300;
 }
 
 /* New Color Scheme: Blue #0078D4 (10%), Green #7acc00 (5%), White #FFFFFF (85%) */
