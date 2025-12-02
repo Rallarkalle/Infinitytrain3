@@ -20,17 +20,17 @@ interface Position {
 const getTopicImagePath = (title: string): string | null => {
   const normalizedTitle = title.toLowerCase().trim();
   
-  // Direct mappings - using WebP format for better compression
+  // Direct mappings - using actual file extensions (webp, png, jpg)
   const imageMap: Record<string, string> = {
-    'mbes': '/images/topics/mbes.webp',
-    'vc': '/images/topics/svc.webp',
-    'qinsy': '/images/topics/qinsy.webp',
-    'apos': '/images/topics/apos.webp',
-    'naviscan': '/images/topics/naviscan.webp',
-    'sss': '/images/topics/sss.webp',
-    'svp': '/images/topics/svp.webp',
-    'cpt': '/images/topics/cpt.webp',
-    'subc dvr': '/images/topics/subc dvr.webp',
+    'mbes': '/images/topics/mbes.jpg',
+    'vc': '/images/topics/svc.png',
+    'qinsy': '/images/topics/qinsy.png',
+    'apos': '/images/topics/apos.png',
+    'naviscan': '/images/topics/naviscan.jpg',
+    'sss': '/images/topics/sss.png',
+    'svp': '/images/topics/svp.png',
+    'cpt': '/images/topics/cpt.png',
+    'subc dvr': '/images/topics/subc dvr.png',
     'gnss': '/images/topics/gnss.webp',
   };
   
@@ -41,10 +41,10 @@ const getTopicImagePath = (title: string): string | null => {
   
   // Check for partial matches
   if (normalizedTitle.includes('online') || normalizedTitle.includes('auto log')) {
-    return '/images/topics/onlinelog_autolog.webp';
+    return '/images/topics/onlinelog_autolog.png';
   }
   if (normalizedTitle.includes('helmsman') || normalizedTitle.includes('touchpad')) {
-    return '/images/topics/helmsman_touchpad.webp';
+    return '/images/topics/helmsman_touchpad.png';
   }
   
   return null;
