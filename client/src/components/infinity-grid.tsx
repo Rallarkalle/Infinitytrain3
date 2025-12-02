@@ -156,12 +156,10 @@ export function InfinityGrid({ topics, onEdit }: InfinityGridProps) {
           const topicImage = getTopicImagePath(topic.title);
           const progressPercent = calculateTopicProgress(topic);
           
-          // SVG progress ring calculations
-          const size = 7 * scaleFactor * 16; // Convert rem to pixels (assuming 16px = 1rem)
-          const strokeWidth = 6; // Thicker border for better visibility
-          const radius = (size / 2) - (strokeWidth / 2);
-          const circumference = 2 * Math.PI * radius;
-          const strokeDashoffset = circumference - (progressPercent / 100) * circumference;
+          // Calculate dimensions
+          const containerSize = 7 * scaleFactor; // in rem
+          const strokeWidth = 6; // px
+          const borderRadius = 24; // rounded-3xl = 24px
 
           return (
             <div 
@@ -169,41 +167,24 @@ export function InfinityGrid({ topics, onEdit }: InfinityGridProps) {
               className="relative group w-fit"
             >
               <Link href={`/topic/${topic.id}`}>
-                <div className="relative inline-block">
-                  {/* Progress Ring SVG - positioned behind */}
-                  <svg
-                    className="absolute -rotate-90"
+                <div className="relative" style={{ padding: `${strokeWidth}px` }}>
+                  {/* Progress border using CSS */}
+                  <div 
+                    className={cn(
+                      "absolute inset-0",
+                      topicImage ? "rounded-3xl" : "rounded-full"
+                    )}
                     style={{
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%) rotate(-90deg)',
-                      width: `${7 * scaleFactor}rem`,
-                      height: `${7 * scaleFactor}rem`
+                      background: `conic-gradient(from 0deg, #7acc00 0deg ${progressPercent * 3.6}deg, #FFFFFF ${progressPercent * 3.6}deg 360deg)`,
+                      padding: `${strokeWidth}px`,
+                      WebkitMask: topicImage 
+                        ? `linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)`
+                        : `radial-gradient(farthest-side, transparent calc(100% - ${strokeWidth}px), #fff calc(100% - ${strokeWidth}px))`,
+                      WebkitMaskComposite: 'xor',
+                      maskComposite: 'exclude',
+                      transition: 'background 0.5s ease'
                     }}
-                  >
-                    {/* Background ring (white) */}
-                    <circle
-                      cx={`${3.5 * scaleFactor}rem`}
-                      cy={`${3.5 * scaleFactor}rem`}
-                      r={`${3.5 * scaleFactor - 0.1875}rem`}
-                      fill="none"
-                      stroke="#FFFFFF"
-                      strokeWidth="6"
-                    />
-                    {/* Progress ring (lime green) */}
-                    <circle
-                      cx={`${3.5 * scaleFactor}rem`}
-                      cy={`${3.5 * scaleFactor}rem`}
-                      r={`${3.5 * scaleFactor - 0.1875}rem`}
-                      fill="none"
-                      stroke="#7acc00"
-                      strokeWidth="6"
-                      strokeDasharray={circumference}
-                      strokeDashoffset={strokeDashoffset}
-                      strokeLinecap="round"
-                      className="transition-all duration-500"
-                    />
-                  </svg>
+                  />
                   
                   {/* Topic Content */}
                   <div
@@ -215,8 +196,8 @@ export function InfinityGrid({ topics, onEdit }: InfinityGridProps) {
                     )}
                     style={{
                       background: topicImage ? 'transparent' : getPieChartBackground(topic),
-                      width: `${7 * scaleFactor}rem`,
-                      height: `${7 * scaleFactor}rem`
+                      width: `${containerSize}rem`,
+                      height: `${containerSize}rem`
                     }}
                   >
                   {topicImage ? (
