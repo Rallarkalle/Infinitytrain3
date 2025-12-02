@@ -59,7 +59,7 @@
   --font-hand: "Kalam", cursive;
 }
 
-/* New Color Scheme: Blue #0078D4 (10%), Green #008272 (5%), White #FFFFFF (85%) */
+/* New Color Scheme: Blue #0078D4 (10%), Green #7acc00 (5%), White #FFFFFF (85%) */
 :root {
   --radius: 0.75rem;
 
@@ -67,8 +67,8 @@
   --primary: 207 100% 42%; /* #0078D4 */
   --primary-foreground: 0 0% 100%; /* White text on blue */
 
-  /* Green #008272 - Secondary accent color (5% of UI) */
-  --secondary: 176 100% 26%; /* #008272 */
+  /* Green #7acc00 - Secondary accent color (5% of UI) */
+  --secondary: 83 100% 40%; /* #7acc00 */
   --secondary-foreground: 0 0% 100%; /* White text on green */
 
   /* White #FFFFFF - Main background (85% of UI) */

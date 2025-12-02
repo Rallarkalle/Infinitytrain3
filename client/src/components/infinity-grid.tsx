@@ -177,7 +177,7 @@ export function InfinityGrid({ topics, onEdit }: InfinityGridProps) {
                 className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 text-xs font-bold text-center px-3 py-1.5 leading-relaxed rounded-md"
                 style={{ 
                   fontSize: '0.75rem', 
-                  backgroundColor: '#008272', 
+                  backgroundColor: '#7acc00', 
                   color: '#FFFFFF',
                   boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                   whiteSpace: 'nowrap',
