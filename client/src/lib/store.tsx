@@ -167,7 +167,24 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newProgress)
-    }).catch(err => console.error('Failed to save progress:', err));
+    })
+    .then(res => {
+      if (!res.ok) {
+        console.error('Failed to save progress - HTTP status:', res.status);
+        return res.text().then(text => {
+          console.error('Response:', text);
+          throw new Error('Failed to save progress');
+        });
+      }
+      return res.json();
+    })
+    .then(data => {
+      console.log('Progress saved successfully:', data);
+    })
+    .catch(err => {
+      console.error('Failed to save progress:', err);
+      alert('Failed to save progress. Please try again.');
+    });
   };
 
   const addComment = (subtopicId: string, commentData: Omit<Comment, 'id' | 'timestamp'>) => {

@@ -300,13 +300,20 @@ export class SupabaseStorage implements IStorage {
   }
 
   async saveProgress(progress: UserProgress): Promise<void> {
-    await this.supabase
+    const { error } = await this.supabase
       .from('progress')
       .upsert({
         user_id: progress.userId,
         subtopic_id: progress.subtopicId,
         status: progress.status
+      }, {
+        onConflict: 'user_id,subtopic_id'
       });
+
+    if (error) {
+      console.error('Failed to save progress:', error);
+      throw error;
+    }
   }
 
   async getUser(id: string): Promise<User | undefined> {
