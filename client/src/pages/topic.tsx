@@ -3,18 +3,21 @@ import { useRoute, useLocation } from 'wouter';
 import { Layout } from '@/components/layout';
 import { useTraining, ProgressStatus } from '@/lib/store';
 import { Notepad } from '@/components/notepad';
+import { ResourceManager } from '@/components/resource-manager';
+import { ResourceViewer } from '@/components/resource-viewer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, BookOpen, MessageSquare, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, BookOpen, MessageSquare, CheckCircle2, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function TopicView() {
   const [, params] = useRoute('/topic/:id');
   const [, setLocation] = useLocation();
-  const { topics, progress, updateProgress, addComment, currentUser, viewAsUser } = useTraining();
+  const { topics, progress, updateProgress, addComment, currentUser, viewAsUser, updateSubtopicResources } = useTraining();
   const [activeResource, setActiveResource] = useState<string | null>(null);
   const [activeComments, setActiveComments] = useState<string | null>(null);
+  const [manageResourcesFor, setManageResourcesFor] = useState<string | null>(null);
 
   const topic = topics.find(t => t.id === params?.id);
 
@@ -64,7 +67,7 @@ export default function TopicView() {
                 <div className="flex flex-col md:flex-row gap-6 justify-between items-start md:items-center">
                   <div className="space-y-2 flex-1">
                     <h3 className="text-xl font-semibold">{subtopic.title}</h3>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                       <Button 
                         variant="outline" 
                         size="sm" 
@@ -81,6 +84,16 @@ export default function TopicView() {
                       >
                         <MessageSquare className="w-4 h-4" /> Notes & Comments ({subtopic.comments.length})
                       </Button>
+                      {currentUser?.role === 'admin' && !viewAsUser && (
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="gap-2 border-secondary text-secondary hover:bg-secondary hover:text-white"
+                          onClick={() => setManageResourcesFor(subtopic.id)}
+                        >
+                          <Settings className="w-4 h-4" /> Manage Resources
+                        </Button>
+                      )}
                     </div>
                   </div>
 
@@ -109,11 +122,23 @@ export default function TopicView() {
 
         {/* Resource Modal */}
         {activeResource && (
-          <Notepad 
-            title={topic.subtopics.find(s => s.id === activeResource)?.title || ''}
-            content={topic.subtopics.find(s => s.id === activeResource)?.resources}
-            mode="read"
+          <ResourceViewer
+            resources={topic.subtopics.find(s => s.id === activeResource)?.resourceLinks || []}
+            textResources={topic.subtopics.find(s => s.id === activeResource)?.resources}
+            subtopicTitle={topic.subtopics.find(s => s.id === activeResource)?.title || ''}
             onClose={() => setActiveResource(null)}
+          />
+        )}
+
+        {/* Resource Manager (Admin only) */}
+        {manageResourcesFor && currentUser?.role === 'admin' && (
+          <ResourceManager
+            resources={topic.subtopics.find(s => s.id === manageResourcesFor)?.resourceLinks || []}
+            subtopicTitle={topic.subtopics.find(s => s.id === manageResourcesFor)?.title || ''}
+            onUpdate={(resources) => {
+              updateSubtopicResources(topic.id, manageResourcesFor, resources);
+            }}
+            onClose={() => setManageResourcesFor(null)}
           />
         )}
 

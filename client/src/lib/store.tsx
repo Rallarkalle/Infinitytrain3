@@ -20,10 +20,19 @@ export interface Comment {
   timestamp: Date;
 }
 
+export interface Resource {
+  id: string;
+  type: 'video' | 'document' | 'text';
+  title: string;
+  url?: string;
+  content?: string;
+}
+
 export interface Subtopic {
   id: string;
   title: string;
   resources: string;
+  resourceLinks?: Resource[];
   comments: Comment[];
 }
 
@@ -55,6 +64,7 @@ interface TrainingContextType {
   updateTopic: (topic: Topic) => void;
   archiveTopic: (topicId: string) => void;
   restoreTopic: (topicId: string) => void;
+  updateSubtopicResources: (topicId: string, subtopicId: string, resources: Resource[]) => void;
 }
 
 const TrainingContext = createContext<TrainingContextType | undefined>(undefined);
@@ -235,6 +245,40 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     }).catch(err => console.error('Failed to restore topic:', err));
   };
 
+  const updateSubtopicResources = (topicId: string, subtopicId: string, resources: Resource[]) => {
+    setTopics(prev => prev.map(topic => {
+      if (topic.id === topicId) {
+        return {
+          ...topic,
+          subtopics: topic.subtopics.map(subtopic => 
+            subtopic.id === subtopicId 
+              ? { ...subtopic, resourceLinks: resources }
+              : subtopic
+          )
+        };
+      }
+      return topic;
+    }));
+
+    // Save to backend
+    const updatedTopic = topics.find(t => t.id === topicId);
+    if (updatedTopic) {
+      const updated = {
+        ...updatedTopic,
+        subtopics: updatedTopic.subtopics.map(subtopic => 
+          subtopic.id === subtopicId 
+            ? { ...subtopic, resourceLinks: resources }
+            : subtopic
+        )
+      };
+      fetch(`/api/topics/${topicId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
+      }).catch(err => console.error('Failed to update subtopic resources:', err));
+    }
+  };
+
   if (isLoading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
@@ -243,7 +287,7 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
     <TrainingContext.Provider value={{ 
       currentUser, viewAsUser, users, topics, progress, 
       setCurrentUser, setViewAsUser, updateProgress, addComment, addTopic, updateTopic,
-      archiveTopic, restoreTopic
+      archiveTopic, restoreTopic, updateSubtopicResources
     }}>
       {children}
     </TrainingContext.Provider>
