@@ -43,12 +43,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4" style={{ 
+      backgroundImage: 'url(/images/background.png)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed'
+    }}>
       <Card className="w-full max-w-md shadow-2xl border-2 border-primary/10">
         <CardHeader className="text-center space-y-4">
           <div className="flex items-center justify-center gap-2">
-            <Infinity className="h-8 w-8 text-secondary animate-pulse-slow" />
-            <h1 className="text-3xl font-bold text-primary">Ocean Training</h1>
+            <img src="/images/logo.png" alt="Company Logo" className="h-12 object-contain" />
           </div>
           <CardDescription>Collaborative Employee Training Platform</CardDescription>
         </CardHeader>
