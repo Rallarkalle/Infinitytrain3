@@ -149,13 +149,48 @@ export function InfinityGrid({ topics, onEdit }: InfinityGridProps) {
     return `conic-gradient(${stops.join(', ')})`;
   };
 
+  // Helper to get segmented progress border based on subtopic statuses
+  const getProgressBorderGradient = (topic: Topic): string => {
+    if (!topic.subtopics.length) return 'conic-gradient(#e5e7eb 0deg 360deg)'; // Gray for no subtopics
+
+    const subtopicIds = topic.subtopics.map(s => s.id);
+    const topicProgress = progress.filter(p => p.userId === displayUser?.id && subtopicIds.includes(p.subtopicId));
+    
+    // Get status for each subtopic in order
+    const statuses: ProgressStatus[] = topic.subtopics.map(st => {
+      const p = topicProgress.find(tp => tp.subtopicId === st.id);
+      return p?.status || 'not_addressed';
+    });
+
+    // Status colors for the border
+    const statusColors: Record<ProgressStatus, string> = {
+      fully_understood: '#22c55e', // green-500
+      good: '#3b82f6', // blue-500
+      basic: '#eab308', // yellow-500
+      not_addressed: '#cbd5e1' // slate-300
+    };
+
+    const total = statuses.length;
+    const degreePerSegment = 360 / total;
+    
+    const stops: string[] = [];
+    statuses.forEach((status, index) => {
+      const startDeg = index * degreePerSegment;
+      const endDeg = (index + 1) * degreePerSegment;
+      const color = statusColors[status];
+      stops.push(`${color} ${startDeg}deg ${endDeg}deg`);
+    });
+
+    return `conic-gradient(from 0deg, ${stops.join(', ')})`;
+  };
+
   return (
     <div className="w-full py-8">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-16 place-items-center">
         {activeTopics.map((topic, index) => {
           const IconComponent = (LucideIcons as any)[topic.icon] || LucideIcons.HelpCircle;
           const topicImage = getTopicImagePath(topic.title);
-          const progressPercent = calculateTopicProgress(topic);
+          const progressBorderGradient = getProgressBorderGradient(topic);
           
           // Calculate dimensions
           const containerSize = 7 * scaleFactor; // in rem
@@ -182,12 +217,9 @@ export function InfinityGrid({ topics, onEdit }: InfinityGridProps) {
                       width: `${containerSize}rem`,
                       height: `${containerSize}rem`,
                       border: `${strokeWidth}px solid transparent`,
-                      backgroundImage: `
-                        conic-gradient(from 0deg, #7acc00 0deg ${progressPercent * 3.6}deg, #FFFFFF ${progressPercent * 3.6}deg 360deg),
-                        ${topicImage ? 'none' : `conic-gradient(${getPieChartBackground(topic)})`}
-                      `,
+                      backgroundImage: progressBorderGradient,
                       backgroundOrigin: 'border-box',
-                      backgroundClip: topicImage ? 'border-box' : 'padding-box, border-box',
+                      backgroundClip: 'padding-box, border-box',
                       transition: 'background 0.5s ease, transform 0.3s ease'
                     }}
                   >
