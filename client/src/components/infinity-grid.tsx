@@ -213,13 +213,15 @@ export function InfinityGrid({ topics, onEdit }: InfinityGridProps) {
                       "hover:scale-105"
                     )}
                     style={{
-                      background: topicImage ? 'transparent' : getPieChartBackground(topic),
+                      background: topicImage ? 'white' : getPieChartBackground(topic),
                       width: `${containerSize}rem`,
                       height: `${containerSize}rem`,
                       border: `${strokeWidth}px solid transparent`,
-                      backgroundImage: progressBorderGradient,
+                      backgroundImage: topicImage 
+                        ? progressBorderGradient
+                        : `${progressBorderGradient}, ${getPieChartBackground(topic)}`,
                       backgroundOrigin: 'border-box',
-                      backgroundClip: 'padding-box, border-box',
+                      backgroundClip: topicImage ? 'border-box' : 'border-box, padding-box',
                       transition: 'background 0.5s ease, transform 0.3s ease'
                     }}
                   >
