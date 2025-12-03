@@ -7,8 +7,11 @@ import { ResourceManager } from '@/components/resource-manager';
 import { ResourceViewer } from '@/components/resource-viewer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, BookOpen, MessageSquare, CheckCircle2, Settings, GripVertical } from 'lucide-react';
+import { ArrowLeft, BookOpen, MessageSquare, CheckCircle2, Settings, GripVertical, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function TopicView() {
@@ -19,6 +22,8 @@ export default function TopicView() {
   const [activeComments, setActiveComments] = useState<string | null>(null);
   const [manageResourcesFor, setManageResourcesFor] = useState<string | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [isAddSubtopicOpen, setIsAddSubtopicOpen] = useState(false);
+  const [newSubtopicTitle, setNewSubtopicTitle] = useState('');
 
   const topic = topics.find(t => t.id === params?.id);
 
@@ -56,6 +61,25 @@ export default function TopicView() {
     setDraggedIndex(null);
   };
 
+  const handleAddSubtopic = () => {
+    if (!newSubtopicTitle.trim()) return;
+
+    const newSubtopic: Subtopic = {
+      id: Math.random().toString(36).substr(2, 9),
+      title: newSubtopicTitle,
+      resources: `# ${newSubtopicTitle}\n\nResources for ${newSubtopicTitle}...`,
+      comments: []
+    };
+
+    updateTopic({
+      ...topic,
+      subtopics: [...topic.subtopics, newSubtopic]
+    });
+    
+    setIsAddSubtopicOpen(false);
+    setNewSubtopicTitle('');
+  };
+
   const getStatus = (subtopicId: string) => {
     const p = progress.find(p => p.userId === displayUser.id && p.subtopicId === subtopicId);
     return p?.status || 'not_addressed';
@@ -89,10 +113,40 @@ export default function TopicView() {
             <p className="text-black font-medium">{topic.subtopics.length} Subtopics</p>
           </div>
           {isAdmin && (
-            <div className="text-sm text-muted-foreground flex items-center gap-2">
-              <GripVertical className="w-4 h-4" />
-              Drag to reorder
-            </div>
+            <>
+              <Dialog open={isAddSubtopicOpen} onOpenChange={setIsAddSubtopicOpen}>
+                <DialogTrigger asChild>
+                  <Button className="shadow-lg bg-[#006400] hover:bg-[#7acc00] text-white gap-2 px-4">
+                    <Plus className="h-5 w-5" />
+                    Add Subtopic
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px] bg-white text-black border-none shadow-2xl">
+                  <DialogHeader>
+                    <DialogTitle className="text-black">Add Subtopic to {topic.title}</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="subtopicTitle" className="text-right text-black">Title</Label>
+                      <Input 
+                        id="subtopicTitle" 
+                        value={newSubtopicTitle} 
+                        onChange={(e) => setNewSubtopicTitle(e.target.value)} 
+                        className="col-span-3 bg-white text-black border-gray-200" 
+                        placeholder="Subtopic Title"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button onClick={handleAddSubtopic} className="bg-black text-white hover:bg-[#7acc00]">Add Subtopic</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+              <div className="text-sm text-muted-foreground flex items-center gap-2">
+                <GripVertical className="w-4 h-4" />
+                Drag to reorder
+              </div>
+            </>
           )}
         </div>
 

@@ -19,11 +19,6 @@ export default function Home() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTopic, setEditingTopic] = useState<Topic | null>(null);
 
-  // Add Subtopic Dialog State
-  const [isSubtopicDialogOpen, setIsSubtopicDialogOpen] = useState(false);
-  const [newSubtopicTitle, setNewSubtopicTitle] = useState('');
-  const [selectedTopicId, setSelectedTopicId] = useState<string>('');
-
   // Change text under modules to black by using custom styling
   const moduleTextStyle = { color: 'black' };
 
@@ -67,29 +62,6 @@ export default function Home() {
       });
     }
     setIsDialogOpen(false);
-  };
-
-  const handleAddSubtopic = () => {
-    if (!selectedTopicId || !newSubtopicTitle) return;
-
-    const topicToUpdate = topics.find(t => t.id === selectedTopicId);
-    if (topicToUpdate) {
-      const newSubtopic: Subtopic = {
-        id: Math.random().toString(36).substr(2, 9),
-        title: newSubtopicTitle,
-        resources: `# ${newSubtopicTitle}\n\nResources for ${newSubtopicTitle}...`,
-        comments: []
-      };
-
-      updateTopic({
-        ...topicToUpdate,
-        subtopics: [...topicToUpdate.subtopics, newSubtopic]
-      });
-      
-      setIsSubtopicDialogOpen(false);
-      setNewSubtopicTitle('');
-      setSelectedTopicId('');
-    }
   };
 
   return (
@@ -168,54 +140,6 @@ export default function Home() {
                     </div>
                     <div className="flex justify-end gap-2">
                       <Button onClick={handleSubmit} className="bg-black text-white hover:bg-[#7acc00]">Save Module</Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-
-                {/* Add Subtopic Button (New) */}
-                <Dialog open={isSubtopicDialogOpen} onOpenChange={setIsSubtopicDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button 
-                      className="shadow-lg bg-[#006400] hover:bg-[#7acc00] text-white gap-2 px-4"
-                      title="Add New Subtopic"
-                    >
-                      <Plus className="h-5 w-5" />
-                      Add Subtopic
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px] bg-white text-black border-none shadow-2xl">
-                    <DialogHeader>
-                      <DialogTitle className="text-black">Add New Subtopic</DialogTitle>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="subtopicTitle" className="text-right text-black">Title</Label>
-                        <Input 
-                          id="subtopicTitle" 
-                          value={newSubtopicTitle} 
-                          onChange={(e) => setNewSubtopicTitle(e.target.value)} 
-                          className="col-span-3 bg-white text-black border-gray-200" 
-                          placeholder="Subtopic Title"
-                        />
-                      </div>
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="topicSelect" className="text-right text-black">Module</Label>
-                        <Select value={selectedTopicId} onValueChange={setSelectedTopicId}>
-                          <SelectTrigger className="col-span-3 bg-white text-black border-gray-200">
-                            <SelectValue placeholder="Select Module" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-white text-black border-gray-200">
-                             {topics.map(t => (
-                               <SelectItem key={t.id} value={t.id} className="text-black hover:bg-gray-100 focus:bg-gray-100">
-                                 {t.title}
-                               </SelectItem>
-                             ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <Button onClick={handleAddSubtopic} className="bg-black text-white hover:bg-[#7acc00]">Add Subtopic</Button>
                     </div>
                   </DialogContent>
                 </Dialog>
