@@ -33,6 +33,7 @@ const getTopicImagePath = (title: string): string | null => {
     'subc dvr': '/images/topics/subc dvr.png',
     'gnss': '/images/topics/gnss.webp',
     'tss440': '/images/topics/tss440.webp',
+    'tss 440': '/images/topics/tss440.webp',
     'obs': '/images/topics/obs.png',
   };
   
@@ -47,6 +48,12 @@ const getTopicImagePath = (title: string): string | null => {
   }
   if (normalizedTitle.includes('helmsman') || normalizedTitle.includes('touchpad')) {
     return '/images/topics/helmsman_touchpad.png';
+  }
+  if (normalizedTitle.includes('obs')) {
+    return '/images/topics/obs.png';
+  }
+  if (normalizedTitle.includes('tss')) {
+    return '/images/topics/tss440.webp';
   }
   
   return null;
