@@ -129,7 +129,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
       setSelectedFile(null);
       setPreviewUrl(null);
     } catch (error) {
-      console.error('Upload error:', error);
       toast({
         title: "Upload failed",
         description: error instanceof Error ? error.message : "Failed to upload profile picture.",

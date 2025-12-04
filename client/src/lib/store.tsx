@@ -56,7 +56,7 @@ interface TrainingContextType {
   users: User[];
   topics: Topic[];
   progress: UserProgress[];
-  setCurrentUser: (user: User) => void;
+  setCurrentUser: (user: User | null) => void;
   setViewAsUser: (user: User | null) => void;
   updateProgress: (subtopicId: string, status: ProgressStatus) => void;
   addComment: (subtopicId: string, comment: Omit<Comment, 'id' | 'timestamp'>) => void;
@@ -188,6 +188,11 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
 
   const updateProgress = (subtopicId: string, status: ProgressStatus) => {
     const userToUpdate = viewAsUser || currentUser;
+    if (!userToUpdate) {
+      console.error('No user available for progress update');
+      return;
+    }
+    
     const newProgress: UserProgress = {
       userId: userToUpdate.id,
       subtopicId,
@@ -220,11 +225,7 @@ export function TrainingProvider({ children }: { children: React.ReactNode }) {
       }
       return res.json();
     })
-    .then(data => {
-      console.log('Progress saved successfully:', data);
-    })
     .catch(err => {
-      console.error('Failed to save progress:', err);
       alert('Failed to save progress. Please try again.');
     });
   };

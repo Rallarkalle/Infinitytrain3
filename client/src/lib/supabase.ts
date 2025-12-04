@@ -64,7 +64,7 @@ export async function uploadProfilePicture(userId: string, file: File): Promise<
 
     return publicUrl;
   } catch (error) {
-    console.error('Error uploading profile picture:', error);
+    // Re-throw for handling in component
     throw error;
   }
 }

@@ -358,7 +358,6 @@ export class SupabaseStorage implements IStorage {
       .single();
 
     if (error) {
-      console.error('Error updating user:', error);
       return undefined;
     }
     return data as User;
