@@ -38,18 +38,18 @@ export async function uploadProfilePicture(userId: string, file: File): Promise<
   try {
     // Delete old avatar if exists
     const { data: existingFiles } = await supabase.storage
-      .from('profile-imgs')
+      .from('PROFILE-IMGS')
       .list(userId);
 
     if (existingFiles && existingFiles.length > 0) {
       await supabase.storage
-        .from('profile-imgs')
+        .from('PROFILE-IMGS')
         .remove(existingFiles.map(f => `${userId}/${f.name}`));
     }
 
     // Upload new avatar
     const { data, error } = await supabase.storage
-      .from('profile-imgs')
+      .from('PROFILE-IMGS')
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: true
@@ -59,7 +59,7 @@ export async function uploadProfilePicture(userId: string, file: File): Promise<
 
     // Get public URL
     const { data: { publicUrl } } = supabase.storage
-      .from('profile-imgs')
+      .from('PROFILE-IMGS')
       .getPublicUrl(filePath);
 
     return publicUrl;
