@@ -121,22 +121,15 @@ export function InfinityGrid({ topics, onEdit }: InfinityGridProps) {
               {/* Vertical Progress Bar */}
               {total > 0 && (
                 <div 
-                  className="flex flex-col h-28 w-2 rounded-full overflow-hidden bg-slate-200 shadow-inner"
+                  className="flex flex-col-reverse h-28 w-2 rounded-full overflow-hidden bg-slate-200 shadow-inner"
                   style={{ height: `${containerSize}rem` }}
                 >
-                  {/* Stack from bottom: green, blue, yellow, white */}
-                  {progressCounts.fully_understood > 0 && (
+                  {/* Stack from bottom to top: green, blue, yellow, white */}
+                  {progressCounts.not_addressed > 0 && (
                     <div 
-                      className="bg-green-500 w-full transition-all duration-500"
-                      style={{ height: `${(progressCounts.fully_understood / total) * 100}%` }}
-                      title={`Fully Understood: ${progressCounts.fully_understood}`}
-                    />
-                  )}
-                  {progressCounts.good > 0 && (
-                    <div 
-                      className="bg-blue-500 w-full transition-all duration-500"
-                      style={{ height: `${(progressCounts.good / total) * 100}%` }}
-                      title={`Good Understanding: ${progressCounts.good}`}
+                      className="bg-slate-300 w-full transition-all duration-500"
+                      style={{ height: `${(progressCounts.not_addressed / total) * 100}%` }}
+                      title={`Not Addressed: ${progressCounts.not_addressed}`}
                     />
                   )}
                   {progressCounts.basic > 0 && (
@@ -146,11 +139,18 @@ export function InfinityGrid({ topics, onEdit }: InfinityGridProps) {
                       title={`Basic Understanding: ${progressCounts.basic}`}
                     />
                   )}
-                  {progressCounts.not_addressed > 0 && (
+                  {progressCounts.good > 0 && (
                     <div 
-                      className="bg-slate-300 w-full transition-all duration-500"
-                      style={{ height: `${(progressCounts.not_addressed / total) * 100}%` }}
-                      title={`Not Addressed: ${progressCounts.not_addressed}`}
+                      className="bg-blue-500 w-full transition-all duration-500"
+                      style={{ height: `${(progressCounts.good / total) * 100}%` }}
+                      title={`Good Understanding: ${progressCounts.good}`}
+                    />
+                  )}
+                  {progressCounts.fully_understood > 0 && (
+                    <div 
+                      className="bg-green-500 w-full transition-all duration-500"
+                      style={{ height: `${(progressCounts.fully_understood / total) * 100}%` }}
+                      title={`Fully Understood: ${progressCounts.fully_understood}`}
                     />
                   )}
                 </div>
